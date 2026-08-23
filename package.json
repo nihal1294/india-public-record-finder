@@ -1,0 +1,11 @@
+{
+  "name": "india-public-record-finder",
+  "private": true,
+  "packageManager": "pnpm@11.19.0",
+  "scripts": {
+    "web:dev": "pnpm --dir apps/web dev",
+    "web:test": "pnpm --dir apps/web test",
+    "web:build": "pnpm --dir apps/web build",
+    "e2e": "pnpm --dir apps/web exec playwright test"
+  }
+}

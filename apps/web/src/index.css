@@ -1,0 +1,100 @@
+@font-face {
+  font-family: 'Noto Sans Kannada';
+  src: url('/fonts/noto-sans-kannada/NotoSansKannada-Regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root { color: #07133f; background: #fff; font-family: 'Noto Sans Kannada', Arial, sans-serif; font-synthesis: weight; text-rendering: optimizeLegibility; }
+* { box-sizing: border-box; }
+html { background: #fff; }
+body { min-width: 320px; margin: 0; background: #fff; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, a:focus-visible, summary:focus-visible, input:focus-visible { outline: 3px solid #00968e; outline-offset: 3px; }
+a { color: inherit; }
+.app-shell { min-height: 100vh; background: #fff; }
+.site-header { height: 65px; display: flex; align-items: center; justify-content: space-between; padding: 0 29px; border: 1px solid #d2d5df; }
+.wordmark { font-size: 23px; line-height: 1; font-weight: 700; text-decoration: none; letter-spacing: -.5px; }
+.site-header nav { display: flex; gap: 39px; align-items: center; font-size: 16px; font-weight: 700; }
+.site-header nav a { text-decoration: none; }
+.language-label { white-space: nowrap; }
+.progress { height: 78px; display: flex; justify-content: center; align-items: center; gap: 0; padding: 0 28px; border: 1px solid #dfe1e7; }
+.progress-item { display: flex; align-items: center; gap: 12px; color: #25304f; font-size: 15px; white-space: nowrap; }
+.progress-number { width: 36px; height: 36px; display: grid; place-items: center; border: 1.5px solid #566076; border-radius: 50%; font-size: 18px; }
+.progress-number[data-active] { border-color: #f25419; background: linear-gradient(135deg, #ff771d, #f23a12); color: #fff; font-weight: 700; box-shadow: 0 5px 10px #f2541940; }
+.progress-item:has(.progress-number[data-active]) span { color: #f25419; font-weight: 700; }
+.progress-item i { width: 103px; height: 1.5px; margin: 0 16px; background: #7d8594; }
+.journey-layout { display: grid; grid-template-columns: minmax(420px, 40.7%) 1fr; min-height: calc(100vh - 143px); }
+.search-panel { padding: 31px 62px 48px; border-right: 1px solid #dde0e6; }
+.collection-copy h1 { max-width: 450px; margin: 0; color: #060f3a; font-size: 29px; line-height: 1.2; letter-spacing: -.6px; }
+.collection-name { margin: 8px 0 0; font-size: 17px; font-weight: 700; }
+.collection-name span { margin: 0 5px; }
+.prototype-banner { margin: 24px 0 20px; padding: 19px 0 12px; border-top: 5px solid transparent; border-image: repeating-linear-gradient(135deg, #f4b799 0 2px, transparent 2px 7px) 5; display: grid; gap: 13px; }
+.prototype-banner p { margin: 0; font-size: 15px; }
+.person-form { display: grid; gap: 18px; }
+.person-form label { display: block; color: #101a40; font-size: 14px; font-weight: 700; }
+.person-form em { font-weight: 400; font-style: normal; }
+.person-form input { display: block; width: 100%; min-height: 41px; margin-top: 7px; padding: 8px 12px; border: 1px solid #aeb4c4; border-radius: 4px; color: #172246; background: #fff; font-size: 15px; }
+.primary-button, .secondary-button { min-height: 44px; display: inline-flex; justify-content: center; align-items: center; gap: 12px; border-radius: 4px; font-size: 15px; font-weight: 700; }
+.primary-button { margin-top: 1px; border: 1px solid #f45115; color: #fff; background: linear-gradient(115deg, #f97924, #f3400d); box-shadow: inset 0 1px #ffffff36; }
+.primary-button:disabled, .secondary-button:disabled { cursor: not-allowed; opacity: .55; }
+.examples { margin-top: 31px; }
+.examples h2 { margin: 0 0 14px; font-size: 14px; }
+.examples div { display: flex; flex-wrap: wrap; gap: 9px 24px; }
+.examples button, .text-button { min-height: 44px; border: 0; padding: 0; color: #004a98; background: transparent; font-size: 13px; font-weight: 700; text-align: left; }
+.reset-button { min-height: 44px; display: inline-flex; align-items: center; gap: 13px; margin-top: 42px; padding: 0; border: 0; color: #091341; background: transparent; font-weight: 700; }
+.reset-button svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.form-error { color: #a02508; font-weight: 700; }
+.search-summary { display: none; }
+.result-panel { min-width: 0; background: linear-gradient(180deg, #fff 0%, #fffefd 100%); }
+.candidate-step { padding: 27px 36px 16px; }
+.candidate-step h2, .evidence-step h2, .result-empty h2 { margin: 0; color: #07113f; font-size: 23px; line-height: 1.15; letter-spacing: -.4px; }
+.match-count { margin: 4px 0 16px; color: #333e5c; font-size: 15px; }
+.refinement { display: flex; align-items: center; justify-content: space-between; margin: 0 0 13px; padding: 10px 12px; border-left: 5px solid #f45115; background: #fff7f2; }
+.refinement p { margin: 0; font-weight: 700; }
+.candidate-card { min-height: 126px; display: grid; grid-template-columns: 38px 1fr 32px; align-items: center; gap: 14px; padding: 19px 20px 15px 9px; border: 1px solid #aab1c0; border-left: 7px solid #00958e; border-radius: 5px; }
+.candidate-card h3 { margin: 0 0 3px; font-size: 22px; line-height: 1.15; letter-spacing: -.25px; }
+.candidate-card h3 span { padding: 0 3px; font-weight: 400; }
+.candidate-card p { margin: 2px 0; color: #263250; font-size: 15px; line-height: 1.2; }
+.match-dot { width: 21px; height: 21px; border: 2px solid #00958e; border-radius: 50%; position: relative; justify-self: center; }
+.match-dot::after { content: ''; position: absolute; inset: 4px; border-radius: 50%; background: #00958e; }
+.candidate-next { width: 32px; min-height: 44px; border: 0; color: #091341; background: transparent; }
+.chevron { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.chevron.left { transform: rotate(180deg); }
+.why-heading { margin: 23px 12px 8px; font-size: 16px; }
+.reasons { margin: 0; padding: 0; list-style: none; }
+.reasons li { min-height: 42px; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 8px 12px; border-bottom: 1px solid #e0e1e5; color: #2e3854; font-size: 15px; }
+.reasons b { color: #39435c; font-weight: 500; }
+.reasons strong { flex: 0 0 auto; color: #008981; font-size: 14px; }
+.candidate-actions { display: flex; justify-content: space-between; gap: 20px; margin-top: 20px; }
+.candidate-actions > button { width: 168px; margin: 0; }
+.secondary-button { border: 1px solid #152249; color: #0d1943; background: #fff; }
+.result-empty { padding: 28px 36px; }
+.result-empty p { margin: 9px 0; color: #283452; }
+.evidence-step { padding: 20px 36px 46px; border-top: 1px solid #e1e2e5; }
+.evidence-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.evidence-heading p { margin: 0; white-space: nowrap; color: #303953; }
+.evidence-status, .evidence-error { margin: 12px 0 0; font-size: 14px; }
+.evidence-error { color: #9a2d0a; font-weight: 700; }
+.evidence-image { display: block; width: 100%; max-height: 292px; margin-top: 13px; border: 1px solid #777; border-radius: 2px; object-fit: contain; background: #f3f3f1; }
+.evidence-image[data-loading] { opacity: .45; }
+.evidence-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 24px; margin: 14px 0; padding: 13px 0; border-top: 1px solid #e0e1e5; border-bottom: 1px solid #e0e1e5; }
+.evidence-fields div { min-width: 0; }.evidence-fields dt { color: #4b5368; font-size: 13px; }.evidence-fields dd { margin: 2px 0 0; font-size: 15px; font-weight: 700; overflow-wrap: anywhere; }
+.determination { margin: 11px 0; color: #008b83; font-size: 15px; font-weight: 700; }
+.how-search-worked { border: 1px solid #aeb4c3; border-radius: 4px; }
+.how-search-worked summary { min-height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; font-size: 15px; font-weight: 700; cursor: pointer; list-style: none; }
+.how-search-worked summary::-webkit-details-marker { display: none; }
+.how-search-worked summary svg { width: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform .16s ease; }
+.how-search-worked[open] summary svg { transform: rotate(90deg); }
+.how-search-worked p { margin: 0; padding: 0 18px 15px; line-height: 1.45; }
+@media (max-width: 700px) {
+  .site-header { height: 88px; padding: 0 30px; }.wordmark { max-width: 350px; font-size: 24px; }.site-header nav { gap: 0; font-size: 19px; }.about-link { display: none; }
+  .progress { height: 134px; align-items: flex-start; justify-content: space-between; padding: 27px 30px 0; overflow: hidden; }.progress-item { width: auto; flex: 1 1 0; flex-direction: column; gap: 8px; align-items: center; position: relative; font-size: 14px; }.progress-number { width: 46px; height: 46px; font-size: 20px; }.progress-item i { width: calc(100% - 40px); position: absolute; top: 23px; left: calc(50% + 20px); height: 1.5px; margin: 0; }.progress-item:last-child { flex: 0 0 83px; }
+  .journey-layout { display: block; min-height: 0; }.search-panel { padding: 39px 42px 29px; border-right: 0; border-bottom: 1px solid #dfe1e7; }.collection-copy h1 { max-width: 580px; font-size: clamp(28px, 5.2vw, 36px); }.collection-name { margin-top: 10px; font-size: 19px; }.prototype-banner { margin: 27px 0 25px; padding: 0 0 23px; border: 0; border-bottom: 1px solid #bfc4d0; gap: 14px; }.prototype-banner p { padding-left: 0; font-size: 18px; }.prototype-banner p::before { content: none !important; }.app-shell[data-has-results='true'] .person-form, .app-shell[data-has-results='true'] .examples { display: none; }.search-summary { display: block; margin: 0 0 24px; padding: 18px 20px; border: 1px solid #aeb4c4; border-radius: 5px; }.search-summary-heading { display: flex; align-items: center; gap: 17px; }.search-summary-heading span { font-size: 25px; }.search-summary-heading h2 { flex: 1; margin: 0; font-size: 20px; }.search-summary-heading svg { width: 25px; fill: none; stroke: currentColor; stroke-width: 2.5; }.search-summary-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; margin-top: 19px; }.search-summary-fields p { margin: 0; font-size: 16px; }.reset-button { margin-top: 20px; font-size: 18px; }
+  .result-panel { background: #fff; }.candidate-step { padding: 27px 42px 19px; }.candidate-step h2, .evidence-step h2, .result-empty h2 { font-size: 24px; }.match-count { font-size: 17px; }.candidate-card { min-height: 159px; grid-template-columns: 40px 1fr 25px; padding: 23px 17px 17px 9px; }.candidate-card h3 { font-size: 25px; }.candidate-card p { font-size: 17px; }.why-heading { margin-top: 34px; font-size: 19px; }.reasons li { min-height: 59px; padding: 10px 17px; font-size: 17px; }.reasons strong { font-size: 16px; }.candidate-actions { margin: 29px -12px 0; gap: 18px; }.candidate-actions > button { width: 50%; font-size: 17px; }.evidence-step { padding: 26px 30px 32px; }.evidence-heading { align-items: flex-start; }.evidence-heading h2 { max-width: 420px; }.evidence-heading p { font-size: 16px; }.evidence-image { min-height: 230px; max-height: none; }.determination { font-size: 17px; }.how-search-worked summary { font-size: 18px; }
+}
+@media (max-width: 430px) {
+  .site-header { height: 70px; padding: 0 20px; gap: 6px; }.wordmark { font-size: 17px; }.site-header nav { font-size: 14px; }.progress { height: 110px; padding: 17px 13px 0; }.progress-item { gap: 6px; font-size: 11px; letter-spacing: -.25px; }.progress-number { width: 36px; height: 36px; font-size: 16px; }.progress-item i { top: 18px; left: calc(50% + 18px); width: calc(100% - 36px); }.progress-item:last-child { flex-basis: auto; }.search-panel, .candidate-step { padding-left: 20px; padding-right: 20px; }.collection-copy h1 { font-size: 28px; }.collection-name { font-size: 16px; }.prototype-banner p { font-size: 15px; }.search-summary { padding: 15px; }.search-summary-heading h2 { font-size: 18px; }.search-summary-fields { gap: 10px; }.search-summary-fields p { font-size: 14px; }.candidate-card h3 { font-size: 20px; }.candidate-card p, .reasons li { font-size: 14px; }.reasons li { gap: 9px; }.reasons strong { font-size: 13px; }.candidate-actions { margin-right: 0; margin-left: 0; }.candidate-actions > button { font-size: 14px; }.evidence-step { padding-left: 20px; padding-right: 20px; }.evidence-heading { display: block; }.evidence-heading p { margin-top: 7px; }
+}
