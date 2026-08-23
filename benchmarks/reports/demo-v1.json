@@ -1,0 +1,99 @@
+{
+  "snapshot_manifest_sha256": "55faabde5e476f272a50beca4d14e1f29308c5a52904536c42281887a2b105ce",
+  "query_count": 180,
+  "slice_metrics": {
+    "romanization": {
+      "query_count": 30,
+      "recall_at_5": 1.0,
+      "top_1_accuracy": 0.7333333333333333,
+      "possible_match_count": 0
+    },
+    "common_name_refinement": {
+      "query_count": 30,
+      "recall_at_5": 1.0,
+      "top_1_accuracy": 1.0,
+      "possible_match_count": 30
+    },
+    "no_match_near_miss": {
+      "query_count": 30,
+      "recall_at_5": 1.0,
+      "top_1_accuracy": 1.0,
+      "possible_match_count": 0
+    },
+    "exact_kannada": {
+      "query_count": 30,
+      "recall_at_5": 1.0,
+      "top_1_accuracy": 1.0,
+      "possible_match_count": 30
+    },
+    "exact_latin": {
+      "query_count": 30,
+      "recall_at_5": 1.0,
+      "top_1_accuracy": 1.0,
+      "possible_match_count": 30
+    },
+    "typo_ocr": {
+      "query_count": 30,
+      "recall_at_5": 1.0,
+      "top_1_accuracy": 0.5,
+      "possible_match_count": 0
+    }
+  },
+  "lexical_slice_metrics": {
+    "romanization": {
+      "query_count": 30,
+      "recall_at_5": 1.0,
+      "top_1_accuracy": 0.8,
+      "possible_match_count": 0
+    },
+    "common_name_refinement": {
+      "query_count": 30,
+      "recall_at_5": 1.0,
+      "top_1_accuracy": 1.0,
+      "possible_match_count": 0
+    },
+    "no_match_near_miss": {
+      "query_count": 30,
+      "recall_at_5": 1.0,
+      "top_1_accuracy": 1.0,
+      "possible_match_count": 0
+    },
+    "exact_kannada": {
+      "query_count": 30,
+      "recall_at_5": 1.0,
+      "top_1_accuracy": 1.0,
+      "possible_match_count": 0
+    },
+    "exact_latin": {
+      "query_count": 30,
+      "recall_at_5": 1.0,
+      "top_1_accuracy": 1.0,
+      "possible_match_count": 0
+    },
+    "typo_ocr": {
+      "query_count": 30,
+      "recall_at_5": 1.0,
+      "top_1_accuracy": 0.4,
+      "possible_match_count": 0
+    }
+  },
+  "overall_recall_at_5": 1.0,
+  "lexical_overall_recall_at_5": 1.0,
+  "latency_p95_ms": 14.220576286315918,
+  "gate": {
+    "path": "saturation",
+    "passed": true,
+    "components": {
+      "hybrid_overall_recall_at_5": 1.0,
+      "lexical_overall_recall_at_5": 1.0,
+      "exact_kannada_top_1_hybrid": 1.0,
+      "exact_kannada_top_1_lexical": 1.0,
+      "exact_latin_top_1_hybrid": 1.0,
+      "exact_latin_top_1_lexical": 1.0,
+      "combined_robust_top_1_hybrid_correct": 37,
+      "combined_robust_top_1_lexical_correct": 36,
+      "combined_robust_top_1_query_count": 60
+    },
+    "errors": []
+  }
+}
