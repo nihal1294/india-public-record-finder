@@ -89,6 +89,63 @@ def test_search_maps_possible_candidate_to_browser_contract(client: TestClient) 
     assert "Gowdaa" not in str(payload)
 
 
+def test_nonidentical_high_similarity_fields_are_not_labeled_exact(client: TestClient) -> None:
+    response = client.post(
+        "/api/search",
+        json={
+            "name": "Ananya Gowdaa",
+            "relative_name": "Ramesh Gowda",
+            "locality": "Chennapura",
+            "age": 30,
+            "limit": 1,
+        },
+    )
+
+    assert response.status_code == 200
+    reasons = {
+        reason["field"]: reason["match"]
+        for reason in response.json()["candidates"][0]["match_reasons"]
+    }
+    assert reasons["Name"] == "Close match"
+    assert reasons["Age"] == "Close match"
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        {
+            "name": "ಅನನ್ಯಾ ಗೌಡ",
+            "relative_name": "ರಮೇಶ್ ಗೌಡ",
+            "locality": "ಚೆನ್ನಾಪುರ",
+            "age": 28,
+            "limit": 1,
+        },
+        {
+            "name": " Ananya  GOWDA ",
+            "relative_name": " Ramesh  GOWDA ",
+            "locality": " CHENNAPURA ",
+            "age": 28,
+            "limit": 1,
+        },
+    ],
+)
+def test_exact_native_or_latin_aliases_are_labeled_exact(
+    client: TestClient, body: dict[str, object]
+) -> None:
+    response = client.post("/api/search", json=body)
+
+    assert response.status_code == 200
+    assert {
+        reason["field"]: reason["match"]
+        for reason in response.json()["candidates"][0]["match_reasons"]
+    } == {
+        "Name": "Exact match",
+        "Relative's name": "Exact match",
+        "Locality": "Exact match",
+        "Age": "Exact match",
+    }
+
+
 def test_no_confident_result_never_exposes_a_candidate_for_verification(client: TestClient) -> None:
     response = client.post(
         "/api/search", json={"name": "Nandini Meridian", "locality": "Imaginary Nagar"}

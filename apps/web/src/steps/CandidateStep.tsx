@@ -49,7 +49,9 @@ export function CandidateStep({
       <ul className="reasons">{reasons.map((reason) => <li key={`${reason.field}-${reason.value}`}><span><b>{reason.field}:</b> “{reason.value}”</span><strong>{reason.match}</strong></li>)}</ul>
       <div className="candidate-actions">
         <button type="button" className="secondary-button" onClick={onPrevious} disabled={candidates.length < 2}><Chevron direction="left" />Previous</button>
-        <button type="button" className="primary-button" onClick={state === 'needs_more_detail' ? onApplyDetails : onVerify}>{state === 'needs_more_detail' ? 'Apply details' : 'Verify source'}<Chevron /></button>
+        {state === 'needs_more_detail'
+          ? onApplyDetails && <button type="button" className="primary-button" onClick={onApplyDetails}>Apply details<Chevron /></button>
+          : <button type="button" className="primary-button" onClick={onVerify}>Verify source<Chevron /></button>}
       </div>
     </section>
   )

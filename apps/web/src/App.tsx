@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { apiClient, type ApiClient } from './api'
 import { PrototypeBanner } from './components/PrototypeBanner'
@@ -33,6 +33,7 @@ function SummaryIcon() {
 export default function App({ api = apiClient }: { api?: ApiClient }) {
   const [step, setStep] = useState<JourneyStep>('collection')
   const [query, setQuery] = useState<SearchRequest>(emptyQuery)
+  const [submittedQuery, setSubmittedQuery] = useState<SearchRequest | null>(null)
   const [response, setResponse] = useState<SearchResponse | null>(null)
   const [examples, setExamples] = useState<DemoExample[]>(fallbackExamples)
   const [activeExample, setActiveExample] = useState<DemoExample | null>(null)
@@ -40,6 +41,7 @@ export default function App({ api = apiClient }: { api?: ApiClient }) {
   const [searching, setSearching] = useState(false)
   const [error, setError] = useState('')
   const [showEvidence, setShowEvidence] = useState(false)
+  const searchGeneration = useRef(0)
 
   useEffect(() => {
     let current = true
@@ -55,23 +57,34 @@ export default function App({ api = apiClient }: { api?: ApiClient }) {
     heading?.focus()
   }, [response, step])
 
-  const runSearch = async (request = query, example: DemoExample | null = activeExample) => {
+  const runSearch = async (request = query, example: DemoExample | null = null) => {
     if (!request.name.trim()) return
+    const generation = ++searchGeneration.current
     setSearching(true)
     setError('')
     setShowEvidence(false)
+    setResponse(null)
+    setSubmittedQuery(null)
     try {
-      const result = await api.search(cleanQuery(request))
+      const submitted = cleanQuery(request)
+      const result = await api.search(submitted)
+      if (generation !== searchGeneration.current) return
       setQuery(request)
+      setSubmittedQuery(submitted)
       setResponse(result)
       setActiveExample(example)
       setCandidateIndex(0)
       setStep(nextStepFor(result))
     } catch {
+      if (generation !== searchGeneration.current) return
+      setResponse(null)
+      setSubmittedQuery(null)
+      setActiveExample(null)
+      setCandidateIndex(0)
       setError('Search is unavailable. Try again.')
       setStep('person')
     } finally {
-      setSearching(false)
+      if (generation === searchGeneration.current) setSearching(false)
     }
   }
 
@@ -82,8 +95,16 @@ export default function App({ api = apiClient }: { api?: ApiClient }) {
   const applyDetails = () => {
     if (activeExample?.refinement) void runSearch({ ...activeExample.query, ...activeExample.refinement } as SearchRequest, activeExample)
   }
+  const updateQuery = (nextQuery: SearchRequest) => {
+    searchGeneration.current += 1
+    setSearching(false)
+    setQuery(nextQuery)
+    setActiveExample(null)
+  }
   const reset = () => {
-    setStep('collection'); setQuery(emptyQuery); setResponse(null); setActiveExample(null)
+    searchGeneration.current += 1
+    setSearching(false)
+    setStep('collection'); setQuery(emptyQuery); setSubmittedQuery(null); setResponse(null); setActiveExample(null)
     setCandidateIndex(0); setShowEvidence(false); setError('')
   }
 
@@ -104,14 +125,14 @@ export default function App({ api = apiClient }: { api?: ApiClient }) {
       <main id="top" className="journey-layout">
         <section className="search-panel" aria-labelledby="journey-title">
           <div id="prototype"><CollectionStep /><PrototypeBanner /></div>
-          {response && <section className="search-summary" aria-label="Your search"><div className="search-summary-heading"><SummaryIcon /><h2>Your search</h2><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m5 9 7 7 7-7" /></svg></div><div className="search-summary-fields"><p>Name: “{query.name}”</p>{query.relative_name && <p>Relative: “{query.relative_name}”</p>}{query.locality && <p>Locality: “{query.locality}”</p>}{query.age && <p>Age: {query.age}</p>}</div></section>}
-          <PersonStep query={query} onChange={setQuery} onSearch={() => void runSearch()} searching={searching} />
+          {response && submittedQuery && <section className="search-summary" aria-label="Your search"><div className="search-summary-heading"><SummaryIcon /><h2>Your search</h2><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m5 9 7 7 7-7" /></svg></div><div className="search-summary-fields"><p>Name: “{submittedQuery.name}”</p>{submittedQuery.relative_name && <p>Relative: “{submittedQuery.relative_name}”</p>}{submittedQuery.locality && <p>Locality: “{submittedQuery.locality}”</p>}{submittedQuery.age && <p>Age: {submittedQuery.age}</p>}</div></section>}
+          <PersonStep query={query} onChange={updateQuery} onSearch={() => void runSearch()} searching={searching} />
           {error && <p className="form-error" role="alert">{error}</p>}
           <section className="examples" aria-label="Try these examples"><h2>Try these examples</h2><div>{examples.map((example) => <button type="button" key={example.id} onClick={() => chooseExample(example)} disabled={searching}>{example.label}</button>)}</div></section>
           <button type="button" className="reset-button" onClick={reset}><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5" /></svg>Reset</button>
         </section>
         <section className="result-panel" aria-label="Search results">
-          {response && <CandidateStep state={response.state} candidates={candidates} index={candidateIndex} onPrevious={() => moveCandidate(-1)} onNext={() => moveCandidate(1)} onVerify={verify} onApplyDetails={applyDetails} />}
+          {response && <CandidateStep state={response.state} candidates={candidates} index={candidateIndex} onPrevious={() => moveCandidate(-1)} onNext={() => moveCandidate(1)} onVerify={verify} onApplyDetails={activeExample?.refinement ? applyDetails : undefined} />}
           {showEvidence && candidate && <EvidenceStep key={candidate.evidence_id} candidate={candidate} source={api.evidenceUrl(candidate.evidence_id)} />}
         </section>
       </main>

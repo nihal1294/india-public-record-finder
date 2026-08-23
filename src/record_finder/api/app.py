@@ -28,6 +28,7 @@ from record_finder.api.privacy import EphemeralRateLimiter
 from record_finder.index.manifest import SnapshotManifest, validate_evidence_id
 from record_finder.integrity import sha256_path
 from record_finder.search.dense import EncoderUnavailable, LocalE5Encoder
+from record_finder.search.normalize import normalize
 from record_finder.search.service import QueryEncoder, SearchQuery, SearchService
 from record_finder.search.service import SearchCandidate as DomainCandidate
 from record_finder.search.service import SearchResponse as DomainSearchResponse
@@ -59,15 +60,34 @@ def _has_encoded_traversal(raw_path: bytes) -> bool:
     return any(segment == ".." for segment in decoded.split("/"))
 
 
-def _match_label(score: float) -> str:
-    if score >= 0.95:
+def _match_label(score: float, *, exact: bool) -> str:
+    if exact:
         return "Exact match"
     if score >= 0.85:
         return "Close match"
     return "Related match"
 
 
-def _candidate_reasons(candidate: DomainCandidate) -> list[MatchReason]:
+def _matches_alias(query: str, native_alias: str, latin_alias: str) -> bool:
+    normalized_query = normalize(query)
+    return normalized_query in {normalize(native_alias), normalize(latin_alias)}
+
+
+def _is_exact_match(field: str, candidate: DomainCandidate, query: SearchRequest) -> bool:
+    if field == "name":
+        return _matches_alias(query.name, candidate.name_native, candidate.name_latin)
+    if field == "relative_name" and query.relative_name is not None:
+        return _matches_alias(
+            query.relative_name,
+            candidate.relative_name_native,
+            candidate.relative_name_latin,
+        )
+    if field == "locality" and query.locality is not None:
+        return _matches_alias(query.locality, candidate.locality_native, candidate.locality_latin)
+    return field == "age" and query.age == candidate.age
+
+
+def _candidate_reasons(candidate: DomainCandidate, query: SearchRequest) -> list[MatchReason]:
     fields = (
         ("name", "Name", candidate.name_native, candidate.field_scores.name),
         (
@@ -80,13 +100,17 @@ def _candidate_reasons(candidate: DomainCandidate) -> list[MatchReason]:
         ("age", "Age", str(candidate.age), candidate.field_scores.age),
     )
     return [
-        MatchReason(field=label, value=value, match=_match_label(score))
+        MatchReason(
+            field=label,
+            value=value,
+            match=_match_label(score, exact=_is_exact_match(key, candidate, query)),
+        )
         for key, label, value, score in fields
         if key in candidate.match_reasons and score is not None
     ]
 
 
-def _candidate_response(candidate: DomainCandidate) -> SearchCandidate:
+def _candidate_response(candidate: DomainCandidate, query: SearchRequest) -> SearchCandidate:
     return SearchCandidate(
         synthetic_id=candidate.synthetic_id,
         name=candidate.name_native,
@@ -97,7 +121,7 @@ def _candidate_response(candidate: DomainCandidate) -> SearchCandidate:
         evidence_id=candidate.source.evidence_id,
         source_part=_source_part(candidate.source.part_number),
         source_page=candidate.source.page_number,
-        match_reasons=_candidate_reasons(candidate),
+        match_reasons=_candidate_reasons(candidate, query),
     )
 
 
@@ -245,7 +269,7 @@ def create_app(
         request.state.result_count = len(candidates)
         return SearchResponse(
             state=result.state,
-            candidates=[_candidate_response(candidate) for candidate in candidates],
+            candidates=[_candidate_response(candidate, payload) for candidate in candidates],
         )
 
     @app.get("/api/records/{synthetic_id}", response_model=RecordResponse)
