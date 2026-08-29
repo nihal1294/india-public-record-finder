@@ -1,8 +1,9 @@
-import type { DemoExample, SearchRequest, SearchResponse } from './contracts'
+import type { DemoExample, DemoRecord, SearchRequest, SearchResponse } from './contracts'
 
 export interface ApiClient {
   search(query: SearchRequest): Promise<SearchResponse>
   examples(): Promise<DemoExample[]>
+  demoRecords(): Promise<DemoRecord[]>
   evidenceUrl(evidenceId: string): string
 }
 
@@ -22,5 +23,6 @@ export const apiClient: ApiClient = {
       body: JSON.stringify({ ...query, limit: query.limit ?? 5 }),
     }),
   examples: () => requestJson<DemoExample[]>('/api/examples'),
+  demoRecords: () => requestJson<DemoRecord[]>('/api/demo/records'),
   evidenceUrl: (evidenceId) => `/api/evidence/${encodeURIComponent(evidenceId)}`,
 }

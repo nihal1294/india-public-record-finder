@@ -78,6 +78,38 @@ def test_api_never_sets_a_cookie(client: TestClient) -> None:
         assert "set-cookie" not in response.headers
 
 
+@pytest.mark.parametrize("method", ["post", "put", "patch", "delete", "options"])
+def test_demo_catalog_is_get_only_and_never_sets_a_cookie(
+    client: TestClient, method: str
+) -> None:
+    get_response = client.get("/api/demo/records")
+    response = getattr(client, method)("/api/demo/records")
+
+    assert get_response.status_code == 200
+    assert get_response.headers["cache-control"] == "no-store"
+    assert "set-cookie" not in get_response.headers
+    assert response.status_code == 405
+    assert response.headers["cache-control"] == "no-store"
+    assert "set-cookie" not in response.headers
+    assert response.json() == {"detail": "method not allowed"}
+
+
+def test_demo_catalog_head_is_not_allowed_and_never_sets_a_cookie(client: TestClient) -> None:
+    response = client.head("/api/demo/records")
+
+    assert response.status_code == 405
+    assert response.headers["cache-control"] == "no-store"
+    assert "set-cookie" not in response.headers
+
+
+def test_general_records_list_route_is_not_exposed(client: TestClient) -> None:
+    response = client.get("/api/records")
+
+    assert response.status_code == 404
+    assert response.headers["cache-control"] == "no-store"
+    assert response.json() == {"detail": "not found"}
+
+
 def test_rate_limit_is_ephemeral_and_never_cacheable(client: TestClient) -> None:
     for _ in range(30):
         assert client.post("/api/search", json={"name": "Ananya"}).status_code == 200

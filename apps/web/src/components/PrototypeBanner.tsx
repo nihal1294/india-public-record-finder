@@ -1,9 +1,11 @@
-export function PrototypeBanner() {
+import type { Messages } from '../i18n'
+
+export function PrototypeBanner({ copy }: { copy: Messages['prototype'] }) {
   return (
-    <section className="prototype-banner" aria-label="Prototype boundary">
-      <p>Independent hackathon prototype</p>
-      <p>Synthetic data only</p>
-      <p>Do not enter real personal information.</p>
+    <section className="prototype-banner" aria-label={copy.boundary}>
+      <p>{copy.independentPrototype}</p>
+      <p>{copy.syntheticDataOnly}</p>
+      <p>{copy.doNotEnterPersonalInformation}</p>
     </section>
   )
 }
