@@ -36,7 +36,10 @@ SERVICE_COMMAND = [
     "8080",
 ]
 
-image = modal.Image.from_dockerfile(DOCKERFILE, context_dir=REPOSITORY_ROOT)
+image = modal.Image.from_dockerfile(
+    DOCKERFILE,
+    context_dir=REPOSITORY_ROOT,
+).entrypoint([])
 app = modal.App(APP_NAME)
 
 

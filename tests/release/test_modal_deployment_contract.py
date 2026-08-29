@@ -206,6 +206,31 @@ def test_modal_driver_runs_the_dockerfile_service_command_without_a_shell() -> N
     assert "shell" not in _call_keywords(popen)
 
 
+def test_modal_driver_clears_the_docker_entrypoint_before_modal_starts_its_runner() -> None:
+    module = _driver_module()
+    image_assignment = next(
+        statement
+        for statement in module.body
+        if isinstance(statement, ast.Assign)
+        and any(
+            isinstance(target, ast.Name) and target.id == "image"
+            for target in statement.targets
+        )
+    )
+
+    image_value = image_assignment.value
+    assert isinstance(image_value, ast.Call)
+    assert isinstance(image_value.func, ast.Attribute)
+    assert image_value.func.attr == "entrypoint"
+    assert len(image_value.args) == 1
+    assert _literal(image_value.args[0]) == []
+
+    dockerfile_image = image_value.func.value
+    assert isinstance(dockerfile_image, ast.Call)
+    assert isinstance(dockerfile_image.func, ast.Attribute)
+    assert dockerfile_image.func.attr == "from_dockerfile"
+
+
 def test_docker_runtime_does_not_install_deploy_tooling() -> None:
     dockerfile = (REPOSITORY_ROOT / "Dockerfile").read_text()
     assert "uv sync --frozen --no-dev --no-install-project" in dockerfile
