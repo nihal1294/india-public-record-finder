@@ -5,6 +5,9 @@ helping a person find a possible match in a fictional historical roll and
 verify the source before deciding. It does not determine identity, voter
 registration, or eligibility.
 
+- [Try the live synthetic demo](https://nihaliddya--india-public-record-finder-web.modal.run/)
+- [Watch the two-minute demonstration](https://drive.google.com/file/d/1XW1h0NIwHuy3ux70VTRoE2Cdg3RFMCwF/view?usp=drive_link)
+
 ## Why this exists
 
 Scanned historical rolls can be difficult to navigate when a name appears in a
