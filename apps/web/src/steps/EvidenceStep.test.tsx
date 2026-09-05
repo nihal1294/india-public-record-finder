@@ -10,6 +10,24 @@ const candidate = {
 }
 
 describe('EvidenceStep', () => {
+  it.each([
+    { source_part: undefined, source_page: undefined, reference: null },
+    { source_part: 'KA-03', source_page: undefined, reference: 'Part KA-03' },
+    { source_part: undefined, source_page: 7, reference: 'Page 7' },
+  ])('shows only supplied source metadata: $reference', async ({ source_part, source_page, reference }) => {
+    const user = userEvent.setup()
+    render(<EvidenceStep candidate={{ ...candidate, source_part, source_page }} source="/api/evidence/evidence-SYN-KA-A" copy={messages.en.evidence} />)
+
+    expect(screen.queryByText(/Part KA-01/)).toBeNull()
+    expect(screen.queryByText(/Page 1/)).toBeNull()
+    if (reference) expect(screen.getByText(reference)).toBeTruthy()
+    fireEvent.load(screen.getByAltText('Synthetic source crop'))
+    await user.click(screen.getByRole('button', { name: 'Open larger view' }))
+    expect(screen.queryByText(/Part KA-01/)).toBeNull()
+    expect(screen.queryByText(/Page 1/)).toBeNull()
+    if (reference) expect(screen.getAllByText(reference)).toHaveLength(2)
+  })
+
   it('shows loading, failure, and the candidate fields alongside source evidence', () => {
     render(<EvidenceStep candidate={candidate} source="/api/evidence/evidence-SYN-KA-A" copy={messages.en.evidence} />)
 

@@ -16,7 +16,7 @@ set and their resolved versions:
 - `huggingface-hub` 1.28.0 and `sentence-transformers` 6.0.0 - Apache-2.0.
 - `numpy` 2.5.2 - BSD-3-Clause.
 - `pillow` 12.3.0 - MIT-CMU.
-- `platformdirs` 4.11.3, `pydantic` 2.13.4, `rapidfuzz` 3.14.5, and `typer`
+- `pydantic` 2.13.4, `rapidfuzz` 3.14.5, and `typer`
   0.27.1 - MIT.
 - `pypdfium2` 5.13.0 - BSD-3-Clause, Apache-2.0, and its dependency
   licenses, as stated in its package metadata.
@@ -68,7 +68,7 @@ The web workspace importer in `pnpm-lock.yaml` resolves these direct packages:
 
 - Runtime: `react` 19.2.8 and `react-dom` 19.2.8 - MIT.
 - `@playwright/test` 1.62.1 - Apache-2.0.
-- `@testing-library/jest-dom` 7.0.1, `@testing-library/react` 16.3.2,
+- `@testing-library/react` 16.3.2,
   `@testing-library/user-event` 14.6.5 - MIT.
 - `@types/node` 24.13.3, `@types/react` 19.2.18, and `@types/react-dom`
   19.2.4 - MIT.

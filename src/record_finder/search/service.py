@@ -450,8 +450,3 @@ def benchmark_gate_result(report: BenchmarkReport) -> BenchmarkGateResult:
                 "combined Romanization and typo/error top-1 regressed from lexical retrieval"
             )
     return BenchmarkGateResult(path=path, components=components, errors=tuple(errors))
-
-
-def benchmark_acceptance_errors(report: BenchmarkReport) -> tuple[str, ...]:
-    """Compatibility wrapper for callers that need only failed acceptance gates."""
-    return benchmark_gate_result(report).errors

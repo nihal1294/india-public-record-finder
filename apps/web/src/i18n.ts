@@ -12,7 +12,6 @@ export interface Messages {
   }
   progress: {
     label: string
-    collection: string
     personDetails: string
     possibleMatches: string
     verifySource: string
@@ -21,12 +20,6 @@ export interface Messages {
   collection: {
     heading: string
     subheading: string
-  }
-  prototype: {
-    boundary: string
-    independentPrototype: string
-    syntheticDataOnly: string
-    doNotEnterPersonalInformation: string
   }
   demo: {
     heading: string
@@ -183,21 +176,14 @@ export const messages: Record<Language, Messages> = {
     },
     progress: {
       label: 'Search progress',
-      collection: 'Collection',
       personDetails: 'Person details',
       possibleMatches: 'Possible matches',
       verifySource: 'Verify source',
-      mobileSummary: 'Step {current} of 4 - {step}',
+      mobileSummary: 'Step {current} of {total} - {step}',
     },
     collection: {
       heading: 'Find a record. Verify the source.',
       subheading: 'Karnataka - Synthetic historical roll',
-    },
-    prototype: {
-      boundary: 'Synthetic data only',
-      independentPrototype: 'Independent hackathon prototype',
-      syntheticDataOnly: 'Synthetic data only',
-      doNotEnterPersonalInformation: 'Do not enter real personal information.',
     },
     demo: {
       heading: 'Synthetic demo records',
@@ -312,21 +298,14 @@ export const messages: Record<Language, Messages> = {
     },
     progress: {
       label: 'ಹುಡುಕಾಟದ ಹಂತಗಳು',
-      collection: 'ದಾಖಲೆ ಸಂಗ್ರಹ',
       personDetails: 'ವ್ಯಕ್ತಿಯ ವಿವರಗಳು',
       possibleMatches: 'ಸಂಭವನೀಯ ಹೊಂದಾಣಿಕೆಗಳು',
       verifySource: 'ಮೂಲವನ್ನು ಪರಿಶೀಲಿಸಿ',
-      mobileSummary: 'ಹಂತ {current} / 4 - {step}',
+      mobileSummary: 'ಹಂತ {current} / {total} - {step}',
     },
     collection: {
       heading: 'ದಾಖಲೆ ಹುಡುಕಿ. ಮೂಲವನ್ನು ಪರಿಶೀಲಿಸಿ.',
       subheading: 'ಕರ್ನಾಟಕ - ಕೃತಕ ಐತಿಹಾಸಿಕ ಮತದಾರರ ಪಟ್ಟಿ',
-    },
-    prototype: {
-      boundary: 'ಕೃತಕ ಮಾಹಿತಿ ಮಾತ್ರ',
-      independentPrototype: 'ಸ್ವತಂತ್ರ ಹ್ಯಾಕಥಾನ್ ಮಾದರಿ',
-      syntheticDataOnly: 'ಕೃತಕ ಮಾಹಿತಿ ಮಾತ್ರ',
-      doNotEnterPersonalInformation: 'ನಿಜವಾದ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ನಮೂದಿಸಬೇಡಿ.',
     },
     demo: {
       heading: 'ಕೃತಕ ಡೆಮೊ ದಾಖಲೆಗಳು',

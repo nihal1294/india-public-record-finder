@@ -45,8 +45,8 @@ describe('i18n catalogue', () => {
     render(createElement(StepProgress, { active: 'person', copy: messages.kn.progress }))
 
     expect(screen.getByRole('navigation', { name: 'ಹುಡುಕಾಟದ ಹಂತಗಳು' })).toBeTruthy()
-    expect(screen.getByText('ಹಂತ 2 / 4 - ವ್ಯಕ್ತಿಯ ವಿವರಗಳು').getAttribute('aria-hidden')).toBe('true')
-    expect(screen.getAllByRole('listitem')).toHaveLength(4)
+    expect(screen.getByText('ಹಂತ 1 / 3 - ವ್ಯಕ್ತಿಯ ವಿವರಗಳು').getAttribute('aria-hidden')).toBe('true')
+    expect(screen.getAllByRole('listitem')).toHaveLength(3)
     expect(screen.getByRole('listitem', { name: 'ವ್ಯಕ್ತಿಯ ವಿವರಗಳು' }).getAttribute('aria-current')).toBe('step')
   })
 

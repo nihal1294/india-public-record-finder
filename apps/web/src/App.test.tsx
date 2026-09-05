@@ -59,6 +59,26 @@ afterEach(() => {
 })
 
 describe('App', () => {
+  it('tracks the three citizen actions and returns to person details on reset', async () => {
+    const user = userEvent.setup()
+    const search = vi.fn(async () => ({ state: 'possible_match' as const, candidates: [candidate] }))
+    render(<App api={{ ...fakeApi, search }} />)
+    const progress = within(screen.getByRole('navigation', { name: 'Search progress' }))
+
+    expect(progress.getAllByRole('listitem')).toHaveLength(3)
+    expect(progress.getByRole('listitem', { name: 'Person details' }).getAttribute('aria-current')).toBe('step')
+    await user.type(screen.getByLabelText('Name'), 'Kavya Nayak')
+    await user.click(screen.getByRole('button', { name: 'Find possible matches' }))
+    expect(progress.getByRole('listitem', { name: 'Possible matches' }).getAttribute('aria-current')).toBe('step')
+    await user.click(screen.getByRole('button', { name: 'Verify source' }))
+    expect(progress.getByRole('listitem', { name: 'Verify source' }).getAttribute('aria-current')).toBe('step')
+    expect(screen.getByRole('heading', { name: 'Check the source before deciding' })).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: 'Reset' }))
+    expect(progress.getByRole('listitem', { name: 'Person details' }).getAttribute('aria-current')).toBe('step')
+    expect(screen.queryByRole('heading', { name: 'Check the source before deciding' })).toBeNull()
+    expect((screen.getByLabelText('Name') as HTMLInputElement).value).toBe('')
+  })
+
   it('opens About from the real header without changing the route, form, storage, or cookies', async () => {
     const user = userEvent.setup()
     window.history.replaceState({}, '', '/?keep=clean#context')

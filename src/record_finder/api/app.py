@@ -186,20 +186,6 @@ def _public_candidates(result: DomainSearchResponse) -> tuple[DomainCandidate, .
     return ()
 
 
-def _record_response(candidate: DomainCandidate) -> RecordResponse:
-    return RecordResponse(
-        synthetic_id=candidate.synthetic_id,
-        name=candidate.name_native,
-        latin_name=candidate.name_latin,
-        relative_name=candidate.relative_name_latin,
-        locality=candidate.locality_latin,
-        age=candidate.age,
-        evidence_id=candidate.source.evidence_id,
-        source_part=_source_part(candidate.source.part_number),
-        source_page=candidate.source.page_number,
-    )
-
-
 def _demo_record_response(record: _DemoRecord) -> DemoRecordResponse:
     return DemoRecordResponse(
         synthetic_id=record.synthetic_id,

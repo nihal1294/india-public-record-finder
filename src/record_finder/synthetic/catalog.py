@@ -4,8 +4,6 @@ from dataclasses import dataclass
 from random import Random
 from typing import Literal
 
-from record_finder.domain.models import PublicRecord
-
 SEED = 20260822
 
 
@@ -263,14 +261,3 @@ class KarnatakaSyntheticAdapter:
         "age": (430, 364, 600, 406),
         "gender": (620, 364, 810, 406),
     }
-
-    def aliases(self, value: str) -> tuple[str, ...]:
-        return (value,)
-
-    def searchable_fields(self, record: PublicRecord) -> dict[str, tuple[str, ...]]:
-        typed = record
-        return {
-            "name": (typed.name_native, typed.name_latin),
-            "relative_name": (typed.relative_name_native, typed.relative_name_latin),
-            "locality": (typed.locality_native, typed.locality_latin),
-        }

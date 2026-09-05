@@ -53,6 +53,16 @@ or live government system. The browser does not put a query in its URL,
 `localStorage`, or `sessionStorage`; the documented API responses do not set
 cookies. Do not enter real personal information.
 
+### What the benchmark establishes
+
+The [180-query synthetic benchmark](benchmarks/reports/demo-v1.json) compares
+hybrid retrieval with lexical retrieval. On 30 Romanized-name queries, the
+expected record ranks first in 22 hybrid results versus 24 lexical results.
+On 30 typo queries, those counts are 15 versus 12. Both methods place the
+expected record in the first five results for every positive test query.
+Embeddings therefore help some queries and hurt others; this small fictional
+dataset does not establish accuracy on real voter rolls or other languages.
+
 ### Judge test bench
 
 `/demo-data` is a synthetic, demo-only judge test bench. It lists only the 120

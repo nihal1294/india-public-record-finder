@@ -44,11 +44,7 @@ export function CandidateStep({
   }
   const candidate = candidates[index]
   if (!candidate) return null
-  const reasons = candidate.match_reasons?.length ? candidate.match_reasons : [
-    { field: 'Name', value: candidate.latin_name ?? candidate.name, match: 'Close match' },
-    ...(candidate.relative_name ? [{ field: "Relative's name", value: candidate.relative_name, match: 'Exact match' }] : []),
-    ...(candidate.locality ? [{ field: 'Locality', value: candidate.locality, match: 'Exact match' }] : []),
-  ]
+  const reasons = candidate.match_reasons ?? []
   return (
     <section className="candidate-step">
       <h2 id="result-heading" tabIndex={-1}>{copy.heading}</h2>
@@ -62,8 +58,10 @@ export function CandidateStep({
         <div><h3>{candidate.name}{candidate.latin_name && <> <span>/</span> {candidate.latin_name}</>}</h3><p>{candidate.relative_name}</p><p>{candidate.locality}</p><p>{formatMessage(copy.ageInRollYear, { age: candidate.age ?? '' })}</p></div>
         <button className="candidate-next" type="button" onClick={onNext} disabled={index >= candidates.length - 1} aria-label={copy.nextResult}><span>{copy.nextResult}</span><Chevron /></button>
       </article>
-      <h3 className="why-heading">{copy.whatMatched}</h3>
-      <ul className="reasons">{reasons.map((reason) => <li key={`${reason.field}-${reason.value}`}><span><b>{displayFieldLabel(reason.field, copy)}:</b> “{reason.value}”</span><strong>{displayMatchLabel(reason.match, language)}</strong></li>)}</ul>
+      {reasons.length > 0 && <>
+        <h3 className="why-heading">{copy.whatMatched}</h3>
+        <ul className="reasons">{reasons.map((reason) => <li key={`${reason.field}-${reason.value}`}><span><b>{displayFieldLabel(reason.field, copy)}:</b> “{reason.value}”</span><strong>{displayMatchLabel(reason.match, language)}</strong></li>)}</ul>
+      </>}
       <div className="candidate-actions">
         <button type="button" className="secondary-button" onClick={onPrevious} disabled={index === 0} aria-label={copy.previousResult}><Chevron direction="left" />{copy.previous}</button>
         {state === 'needs_more_detail'

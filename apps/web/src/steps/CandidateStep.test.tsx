@@ -12,6 +12,16 @@ const candidates = [
 ]
 
 describe('CandidateStep', () => {
+  it.each([undefined, []])('does not invent match labels when reasons are %s', (match_reasons) => {
+    render(<CandidateStep state="possible_match" candidates={[{ ...candidates[0], match_reasons }]} index={0} onPrevious={vi.fn()} onNext={vi.fn()} onVerify={vi.fn()} onEditSearch={vi.fn()} copy={messages.en.results} language="en" />)
+
+    expect(screen.getByText('Ananya')).toBeTruthy()
+    expect(screen.queryByText('What matched your entry')).toBeNull()
+    expect(screen.queryByText('Exact match')).toBeNull()
+    expect(screen.queryByText('Close match')).toBeNull()
+    expect(screen.getByRole('button', { name: 'Verify source' })).toBeTruthy()
+  })
+
   it('orients result navigation without wrapping and localizes only known labels', async () => {
     const user = userEvent.setup()
     const onPrevious = vi.fn()

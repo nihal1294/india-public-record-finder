@@ -1,4 +1,4 @@
-export type JourneyStep = 'collection' | 'person' | 'candidate' | 'evidence'
+export type JourneyStep = 'person' | 'candidate' | 'evidence'
 
 export type SearchState =
   | 'possible_match'

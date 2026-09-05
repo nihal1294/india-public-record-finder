@@ -11,7 +11,6 @@ import type { DemoExample, DemoRecord, JourneyStep, SearchRequest, SearchRespons
 import { fallbackExamples } from './examples'
 import { messages, type Language } from './i18n'
 import { CandidateStep } from './steps/CandidateStep'
-import { CollectionStep } from './steps/CollectionStep'
 import { EvidenceStep } from './steps/EvidenceStep'
 import { PersonStep } from './steps/PersonStep'
 import { useAppRoute } from './useAppRoute'
@@ -39,7 +38,7 @@ function SummaryIcon() {
 export default function App({ api = apiClient }: { api?: ApiClient }) {
   const { route, navigate } = useAppRoute()
   const [language, setLanguage] = useState<Language>('en')
-  const [step, setStep] = useState<JourneyStep>('collection')
+  const [step, setStep] = useState<JourneyStep>('person')
   const [query, setQuery] = useState<SearchRequest>(emptyQuery)
   const [submittedQuery, setSubmittedQuery] = useState<SearchRequest | null>(null)
   const [response, setResponse] = useState<SearchResponse | null>(null)
@@ -47,7 +46,6 @@ export default function App({ api = apiClient }: { api?: ApiClient }) {
   const [candidateIndex, setCandidateIndex] = useState(0)
   const [searching, setSearching] = useState(false)
   const [hasServiceError, setHasServiceError] = useState(false)
-  const [showEvidence, setShowEvidence] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
   const firstOptionalFieldRef = useRef<HTMLInputElement>(null)
@@ -95,7 +93,7 @@ export default function App({ api = apiClient }: { api?: ApiClient }) {
     const generation = ++searchGeneration.current
     setSearching(true)
     setHasServiceError(false)
-    setShowEvidence(false)
+    setStep('person')
     setResponse(null)
     setSubmittedQuery(null)
     try {
@@ -133,7 +131,6 @@ export default function App({ api = apiClient }: { api?: ApiClient }) {
     setShowDetails(true)
     setResponse(null)
     setSubmittedQuery(null)
-    setShowEvidence(false)
     setHasServiceError(false)
     setStep('person')
     handleNavigate('search')
@@ -148,8 +145,8 @@ export default function App({ api = apiClient }: { api?: ApiClient }) {
   const reset = () => {
     searchGeneration.current += 1
     setSearching(false)
-    setStep('collection'); setQuery(emptyQuery); setSubmittedQuery(null); setResponse(null); setShowDetails(false)
-    setCandidateIndex(0); setShowEvidence(false); setHasServiceError(false)
+    setStep('person'); setQuery(emptyQuery); setSubmittedQuery(null); setResponse(null); setShowDetails(false)
+    setCandidateIndex(0); setHasServiceError(false)
   }
 
   const candidates = response?.candidates ?? []
@@ -157,11 +154,10 @@ export default function App({ api = apiClient }: { api?: ApiClient }) {
   const moveCandidate = (direction: -1 | 1) => {
     setCandidateIndex((current) => Math.min(Math.max(current + direction, 0), candidates.length - 1))
   }
-  const verify = () => { if (candidate) { setShowEvidence(true); setStep('evidence') } }
+  const verify = () => { if (candidate) setStep('evidence') }
   const editSearch = () => {
     setResponse(null)
     setSubmittedQuery(null)
-    setShowEvidence(false)
     setShowDetails(true)
     setStep('person')
     const firstMissingField = !query.relative_name ? firstOptionalFieldRef : !query.locality ? localityFieldRef : !query.age ? ageFieldRef : firstOptionalFieldRef
@@ -196,7 +192,11 @@ export default function App({ api = apiClient }: { api?: ApiClient }) {
       <StepProgress active={step} copy={copy.progress} />
       <main id="top" className="journey-layout">
         <section className="search-panel" aria-labelledby="journey-title">
-          <div id="prototype"><CollectionStep copy={copy.collection} /><section className="prototype-banner" aria-label={copy.safety.notice}><p>{copy.safety.notice}</p></section></div>
+          <div className="collection-copy">
+            <h1 id="journey-title">{copy.collection.heading}</h1>
+            <p className="collection-name">{copy.collection.subheading}</p>
+          </div>
+          <section className="prototype-banner" aria-label={copy.safety.notice}><p>{copy.safety.notice}</p></section>
           {response && submittedQuery && <section className="search-summary" aria-label={copy.search.summaryRegionLabel}><div className="search-summary-heading"><SummaryIcon /><h2>{copy.search.summaryHeading}</h2><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m5 9 7 7 7-7" /></svg></div><div className="search-summary-fields"><p>{copy.search.summaryName}: “{submittedQuery.name}”</p>{submittedQuery.relative_name && <p>{copy.search.summaryRelative}: “{submittedQuery.relative_name}”</p>}{submittedQuery.locality && <p>{copy.search.summaryLocality}: “{submittedQuery.locality}”</p>}{submittedQuery.age && <p>{copy.search.summaryAge}: {submittedQuery.age}</p>}</div></section>}
           <PersonStep query={query} onChange={updateQuery} onSearch={() => void runSearch()} searching={searching} showDetails={showDetails} onShowDetailsChange={setShowDetails} copy={copy.person} firstOptionalFieldRef={firstOptionalFieldRef} localityFieldRef={localityFieldRef} ageFieldRef={ageFieldRef} submitButtonRef={submitButtonRef} />
           {hasServiceError && <p className="form-error" role="alert">{copy.search.unavailable}</p>}
@@ -206,7 +206,7 @@ export default function App({ api = apiClient }: { api?: ApiClient }) {
         <section className="result-panel" aria-label={copy.search.resultsRegionLabel}>
           {!response && <BlankResultGuide copy={copy.blankGuide} />}
           {response && <CandidateStep state={response.state} candidates={candidates} index={candidateIndex} onPrevious={() => moveCandidate(-1)} onNext={() => moveCandidate(1)} onVerify={verify} onEditSearch={editSearch} copy={copy.results} language={language} />}
-          {showEvidence && candidate && <EvidenceStep key={candidate.evidence_id} candidate={candidate} source={api.evidenceUrl(candidate.evidence_id)} copy={copy.evidence} />}
+          {step === 'evidence' && candidate && <EvidenceStep key={candidate.evidence_id} candidate={candidate} source={api.evidenceUrl(candidate.evidence_id)} copy={copy.evidence} />}
         </section>
       </main>
       {showAbout && <AboutDialog copy={copy.about} closeLabel={copy.evidence.close} onClose={() => setShowAbout(false)} />}
