@@ -30,6 +30,7 @@ ENV PATH=/app/.venv/bin:$PATH \
     PYTHONUNBUFFERED=1
 RUN groupadd --system recordfinder && useradd --system --gid recordfinder --home-dir /app recordfinder
 WORKDIR /app
+COPY LICENSE /app/LICENSE
 COPY --from=service-build /build/.venv /app/.venv
 COPY --from=service-build /opt/runtime-model-cache /app/model-cache
 COPY models/manifest.json /app/models/manifest.json

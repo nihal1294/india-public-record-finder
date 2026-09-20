@@ -2,6 +2,8 @@
 name = "record-finder"
 version = "0.1.0"
 description = "Synthetic-only tools for finding public records in India"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.14"
 dependencies = [
     "fastapi>=0.141.1",

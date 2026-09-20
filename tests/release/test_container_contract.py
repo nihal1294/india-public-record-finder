@@ -20,6 +20,8 @@ def test_container_recipe_uses_only_the_read_only_service_surface() -> None:
     assert "COPY --from=service-build /opt/runtime-model-cache /app/model-cache" in dockerfile
     assert "COPY data/synthetic/demo-v1 /app/data/synthetic/demo-v1" in dockerfile
     assert "COPY --from=web-build /workspace/apps/web/dist /app/web" in dockerfile
+    runtime_stage = dockerfile.rsplit("\nFROM ", maxsplit=1)[1]
+    assert "COPY LICENSE /app/LICENSE" in runtime_stage.splitlines()
     assert 'ENTRYPOINT ["record-finder"]' in dockerfile
     assert '"--snapshot", "/app/data/synthetic/demo-v1/manifest.json"' in dockerfile
     assert '"--model-cache", "/app/model-cache"' in dockerfile
