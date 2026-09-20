@@ -28,3 +28,7 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 3
+    ignore:
+      - dependency-name: "node"
+        # Node 25 is end-of-life.
+        versions: ["~> 25.0"]
