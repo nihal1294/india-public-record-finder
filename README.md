@@ -190,3 +190,16 @@ start a local server and exercises the release journey against that origin.
 
 Contributions preserve the synthetic-only boundary, add focused tests for
 observable behavior, and pass the relevant validation commands.
+
+## License
+
+Unless otherwise noted, the original code, documentation, and synthetic demo
+assets in this repository are licensed under the [MIT License](LICENSE).
+This includes the fictional records, generated source PDFs and evidence crops,
+and benchmark fixtures. These assets contain fictional data, not real voter
+records.
+
+Third-party software, fonts, and models retain their own licenses. See
+[Third-party notices](THIRD_PARTY_NOTICES.md) and the
+[component inventory](submission/third-party-components.md) for attribution
+and license details.
