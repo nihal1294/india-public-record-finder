@@ -9,8 +9,10 @@ RUN corepack enable && pnpm install --frozen-lockfile
 COPY apps/web apps/web
 RUN pnpm --dir apps/web build
 
+FROM ghcr.io/astral-sh/uv:0.12.5 AS uv
+
 FROM python:3.14-slim AS service-build
-COPY --from=ghcr.io/astral-sh/uv:0.12.5 /uv /usr/local/bin/uv
+COPY --from=uv /uv /usr/local/bin/uv
 WORKDIR /build
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy
