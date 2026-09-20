@@ -2,7 +2,7 @@
   "name": "india-public-record-finder",
   "private": true,
   "license": "MIT",
-  "packageManager": "pnpm@11.19.0",
+  "packageManager": "pnpm@12.5.1",
   "scripts": {
     "web:dev": "pnpm --dir apps/web dev",
     "web:test": "pnpm --dir apps/web test",
