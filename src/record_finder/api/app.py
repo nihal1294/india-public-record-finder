@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from time import perf_counter
+from typing import Protocol
 from urllib.parse import unquote
 
 import numpy as np
@@ -17,6 +18,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.staticfiles import StaticFiles
 
 from record_finder.api.contracts import (
+    DemoRecordResponse,
     HealthResponse,
     MatchReason,
     RecordResponse,
@@ -25,6 +27,7 @@ from record_finder.api.contracts import (
     SearchResponse,
 )
 from record_finder.api.privacy import EphemeralRateLimiter
+from record_finder.domain.models import SourceReference
 from record_finder.index.manifest import SnapshotManifest, validate_evidence_id
 from record_finder.integrity import sha256_path
 from record_finder.search.dense import EncoderUnavailable, LocalE5Encoder
@@ -43,6 +46,38 @@ class _Runtime:
     ready: bool = False
 
 
+class _DemoRecord(Protocol):
+    @property
+    def synthetic_id(self) -> str: ...
+
+    @property
+    def name_native(self) -> str: ...
+
+    @property
+    def name_latin(self) -> str: ...
+
+    @property
+    def relative_name_native(self) -> str: ...
+
+    @property
+    def relative_name_latin(self) -> str: ...
+
+    @property
+    def relationship(self) -> str: ...
+
+    @property
+    def locality_native(self) -> str: ...
+
+    @property
+    def locality_latin(self) -> str: ...
+
+    @property
+    def age(self) -> int: ...
+
+    @property
+    def source(self) -> SourceReference: ...
+
+
 def _source_part(part_number: int) -> str:
     return f"KA-{part_number:02d}"
 
@@ -58,6 +93,21 @@ def _has_encoded_traversal(raw_path: bytes) -> bool:
             return False
         decoded = next_value
     return any(segment == ".." for segment in decoded.split("/"))
+
+
+def _is_api_path(path: str) -> bool:
+    return path == "/api" or path.startswith("/api/")
+
+
+def _is_spa_document_request(request: Request) -> bool:
+    """Return whether a missing path is a browser document navigation."""
+    if request.method != "GET" or _is_api_path(request.url.path):
+        return False
+    if Path(request.url.path).suffix:
+        return False
+    accept = request.headers.get("accept", "")
+    destination = request.headers.get("sec-fetch-dest")
+    return "text/html" in accept and destination in {None, "document"}
 
 
 def _match_label(score: float, *, exact: bool) -> str:
@@ -136,17 +186,20 @@ def _public_candidates(result: DomainSearchResponse) -> tuple[DomainCandidate, .
     return ()
 
 
-def _record_response(candidate: DomainCandidate) -> RecordResponse:
-    return RecordResponse(
-        synthetic_id=candidate.synthetic_id,
-        name=candidate.name_native,
-        latin_name=candidate.name_latin,
-        relative_name=candidate.relative_name_latin,
-        locality=candidate.locality_latin,
-        age=candidate.age,
-        evidence_id=candidate.source.evidence_id,
-        source_part=_source_part(candidate.source.part_number),
-        source_page=candidate.source.page_number,
+def _demo_record_response(record: _DemoRecord) -> DemoRecordResponse:
+    return DemoRecordResponse(
+        synthetic_id=record.synthetic_id,
+        name=record.name_native,
+        latin_name=record.name_latin,
+        relative_name=record.relative_name_native,
+        latin_relative_name=record.relative_name_latin,
+        relationship=record.relationship,
+        locality=record.locality_native,
+        latin_locality=record.locality_latin,
+        age=record.age,
+        evidence_id=record.source.evidence_id,
+        source_part=_source_part(record.source.part_number),
+        source_page=record.source.page_number,
     )
 
 
@@ -200,7 +253,11 @@ def create_app(
         request.state.request_id = secrets.token_hex(16)
         started = perf_counter()
         raw_path = request.scope.get("raw_path", b"")
-        is_api_request = request.url.path.startswith("/api/") or raw_path.startswith(b"/api/")
+        is_api_request = (
+            _is_api_path(request.url.path)
+            or raw_path in {b"/api", b"/api/"}
+            or raw_path.startswith(b"/api/")
+        )
         client_host = request.client.host if request.client is not None else "unknown"
         if is_api_request and _has_encoded_traversal(raw_path):
             response: Response = JSONResponse({"detail": "not found"}, status_code=404)
@@ -215,6 +272,19 @@ def create_app(
                 response = await call_next(request)
             except Exception:
                 response = JSONResponse({"detail": "service unavailable"}, status_code=500)
+            if (
+                response.status_code == 405
+                and web_root is not None
+                and not is_api_request
+                and request.method != "GET"
+            ):
+                response = JSONResponse({"detail": "not found"}, status_code=404)
+            if (
+                response.status_code == 404
+                and web_root is not None
+                and _is_spa_document_request(request)
+            ):
+                response = FileResponse(web_root / "index.html")
         if is_api_request or request.url.path == "/healthz":
             response.headers["Cache-Control"] = "no-store"
         route = request.scope.get("route")
@@ -292,6 +362,14 @@ def create_app(
             source_page=record_value.source.page_number,
         )
 
+    @app.get("/api/demo/records", response_model=list[DemoRecordResponse])
+    async def demo_records() -> list[DemoRecordResponse]:
+        service, manifest = require_ready()
+        return [
+            _demo_record_response(service._records[synthetic_id])
+            for synthetic_id in manifest.record_ids
+        ]
+
     @app.get("/api/evidence/{evidence_id}")
     async def evidence(evidence_id: str) -> FileResponse:
         _, manifest = require_ready()
@@ -320,6 +398,7 @@ def create_app(
 
     non_search_methods = ["POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"]
     app.add_api_route("/api/records/{synthetic_id}", method_not_allowed, methods=non_search_methods)
+    app.add_api_route("/api/demo/records", method_not_allowed, methods=non_search_methods)
     app.add_api_route("/api/evidence/{evidence_id}", method_not_allowed, methods=non_search_methods)
     app.add_api_route("/api/examples", method_not_allowed, methods=non_search_methods)
     app.add_api_route(
@@ -344,5 +423,10 @@ def create_app(
         return JSONResponse({"status": "unavailable"}, status_code=503)
 
     if web_root is not None:
+        @app.get("/demo-data")
+        @app.get("/demo-data/")
+        async def demo_data() -> FileResponse:
+            return FileResponse(web_root / "index.html")
+
         app.mount("/", StaticFiles(directory=web_root, html=True), name="web")
     return app

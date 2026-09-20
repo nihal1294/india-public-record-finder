@@ -4,13 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import App from '../App'
 import type { ApiClient } from '../api'
-import type { DemoExample, SearchRequest, SearchResponse } from '../contracts'
-
-const refinement: Partial<SearchRequest> = {
-  relative_name: 'Sunil Nayak',
-  locality: 'Beluru',
-  age: 31,
-}
+import type { SearchRequest, SearchResponse } from '../contracts'
 
 const candidate = {
   synthetic_id: 'SYN-KA-C',
@@ -20,48 +14,51 @@ const candidate = {
   locality: 'Beluru',
   age: 31,
   evidence_id: 'evidence-syn-ka-c',
-  source_part: 'KA-01',
-  source_page: 1,
-  match_reasons: [
-    { field: 'Name', query: 'Kavya Nayak', value: 'Kavya Nayak', match: 'Exact match' },
-  ],
-}
-
-const example: DemoExample = {
-  id: 'needs-refinement',
-  label: 'Needs refinement',
-  query: { name: 'Kavya Nayak' },
-  refinement,
-  expected_state: 'needs_more_detail',
-  expected_refined_state: 'possible_match',
-  expected_record_id: 'SYN-KA-C',
-}
-
-const search = vi.fn(async (query: SearchRequest): Promise<SearchResponse> =>
-  query.relative_name
-    ? { state: 'possible_match', candidates: [candidate] }
-    : { state: 'needs_more_detail', candidates: [candidate] },
-)
-
-const fakeExamplesApi: ApiClient = {
-  examples: async () => [example],
-  search,
-  evidenceUrl: (id) => `/api/evidence/${id}`,
 }
 
 describe('guided refinement', () => {
-  it('runs refinement before source verification', async () => {
+  it('returns to visible editable details without injecting refinement or searching again', async () => {
     const user = userEvent.setup()
-    search.mockClear()
-    render(<App api={fakeExamplesApi} />)
+    const search = vi.fn(async (_query: SearchRequest): Promise<SearchResponse> => ({ state: 'needs_more_detail', candidates: [candidate] }))
+    const api: ApiClient = {
+      examples: async () => [],
+      demoRecords: async () => [],
+      search,
+      evidenceUrl: (id) => `/api/evidence/${id}`,
+    }
+    render(<App api={api} />)
 
-    await user.click(await screen.findByRole('button', { name: 'Needs refinement' }))
-    expect(await screen.findByText(/needs more detail/i)).toBeTruthy()
-    await user.click(screen.getByRole('button', { name: /apply details/i }))
-    expect(search).toHaveBeenLastCalledWith({ name: 'Kavya Nayak', relative_name: 'Sunil Nayak', locality: 'Beluru', age: 31 })
-    await user.click(await screen.findByRole('button', { name: /verify source/i }))
+    await user.type(screen.getByLabelText('Name'), 'Kavya Nayak')
+    await user.click(screen.getByRole('button', { name: 'Find possible matches' }))
+    await screen.findByText('Needs more detail')
+    await user.click(screen.getByRole('button', { name: 'Edit search' }))
 
-    expect(await screen.findByAltText(/synthetic source crop/i)).toBeTruthy()
-    expect(screen.getByRole('heading', { name: 'Check the source before deciding' })).toBe(document.activeElement)
+    expect(search).toHaveBeenCalledTimes(1)
+    expect((screen.getByLabelText('Name') as HTMLInputElement).value).toBe('Kavya Nayak')
+    expect((screen.getByLabelText("Relative's name (optional)") as HTMLInputElement).value).toBe('')
+    expect((screen.getByLabelText('Locality (optional)') as HTMLInputElement).value).toBe('')
+    expect((screen.getByLabelText('Age in roll year (optional)') as HTMLInputElement).value).toBe('')
+    expect(document.activeElement).toBe(screen.getByLabelText("Relative's name (optional)"))
+    expect(screen.queryByRole('button', { name: 'Apply details' })).toBeNull()
+  })
+
+  it('focuses the first optional field that is still missing', async () => {
+    const user = userEvent.setup()
+    const api: ApiClient = {
+      examples: async () => [],
+      demoRecords: async () => [],
+      search: async () => ({ state: 'needs_more_detail', candidates: [candidate] }),
+      evidenceUrl: (id) => `/api/evidence/${id}`,
+    }
+    render(<App api={api} />)
+
+    await user.type(screen.getByLabelText('Name'), 'Kavya Nayak')
+    await user.click(screen.getByRole('button', { name: 'Add more details' }))
+    await user.type(screen.getByLabelText("Relative's name (optional)"), 'Sunil Nayak')
+    await user.click(screen.getByRole('button', { name: 'Find possible matches' }))
+    await screen.findByText('Needs more detail')
+    await user.click(screen.getByRole('button', { name: 'Edit search' }))
+
+    expect(document.activeElement).toBe(screen.getByLabelText('Locality (optional)'))
   })
 })

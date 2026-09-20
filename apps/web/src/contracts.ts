@@ -1,4 +1,4 @@
-export type JourneyStep = 'collection' | 'person' | 'candidate' | 'evidence'
+export type JourneyStep = 'person' | 'candidate' | 'evidence'
 
 export type SearchState =
   | 'possible_match'
@@ -47,4 +47,19 @@ export interface DemoExample {
   expected_state: SearchState
   expected_refined_state?: SearchState
   expected_record_id?: string
+}
+
+export interface DemoRecord {
+  synthetic_id: string
+  name: string
+  latin_name: string
+  relative_name: string
+  latin_relative_name: string
+  relationship: string
+  locality: string
+  latin_locality: string
+  age: number
+  evidence_id: string
+  source_part: string
+  source_page: number
 }

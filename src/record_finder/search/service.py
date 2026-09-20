@@ -80,6 +80,7 @@ class _Record:
     name_latin: str
     relative_name_native: str
     relative_name_latin: str
+    relationship: str
     locality_native: str
     locality_latin: str
     age: int
@@ -109,7 +110,8 @@ def _load_records(database_path: Path) -> tuple[dict[str, _Record], sqlite3.Conn
     connection = sqlite3.connect(f"file:{database_path}?mode=ro", uri=True)
     rows = connection.execute(
         "SELECT synthetic_id, name_native, name_latin, relative_name_native, relative_name_latin, "
-        "locality_native, locality_latin, age, source_json FROM records ORDER BY position"
+        "relationship, locality_native, locality_latin, age, source_json "
+        "FROM records ORDER BY position"
     ).fetchall()
     records = {
         str(row[0]): _Record(
@@ -118,10 +120,11 @@ def _load_records(database_path: Path) -> tuple[dict[str, _Record], sqlite3.Conn
             name_latin=str(row[2]),
             relative_name_native=str(row[3]),
             relative_name_latin=str(row[4]),
-            locality_native=str(row[5]),
-            locality_latin=str(row[6]),
-            age=int(row[7]),
-            source=SourceReference.model_validate_json(str(row[8])),
+            relationship=str(row[5]),
+            locality_native=str(row[6]),
+            locality_latin=str(row[7]),
+            age=int(row[8]),
+            source=SourceReference.model_validate_json(str(row[9])),
         )
         for row in rows
     }
@@ -447,8 +450,3 @@ def benchmark_gate_result(report: BenchmarkReport) -> BenchmarkGateResult:
                 "combined Romanization and typo/error top-1 regressed from lexical retrieval"
             )
     return BenchmarkGateResult(path=path, components=components, errors=tuple(errors))
-
-
-def benchmark_acceptance_errors(report: BenchmarkReport) -> tuple[str, ...]:
-    """Compatibility wrapper for callers that need only failed acceptance gates."""
-    return benchmark_gate_result(report).errors

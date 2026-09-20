@@ -8,7 +8,6 @@ dependencies = [
     "huggingface-hub>=1.28.0",
     "numpy>=2.5.2",
     "pillow>=12.3.0",
-    "platformdirs>=4.11.3",
     "pydantic>=2.13.4",
     "pypdfium2>=5.13.0",
     "rapidfuzz>=3.14.5",
@@ -26,6 +25,9 @@ requires = ["uv_build>=0.12.5,<0.13.0"]
 build-backend = "uv_build"
 
 [dependency-groups]
+deploy = [
+    "modal==1.5.4",
+]
 dev = [
     "httpx>=0.28.1",
     "mypy>=2.3.1",

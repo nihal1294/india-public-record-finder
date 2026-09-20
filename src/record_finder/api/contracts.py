@@ -58,5 +58,20 @@ class RecordResponse(_StrictModel):
     source_page: int
 
 
+class DemoRecordResponse(_StrictModel):
+    synthetic_id: str
+    name: str
+    latin_name: str
+    relative_name: str
+    latin_relative_name: str
+    relationship: str
+    locality: str
+    latin_locality: str
+    age: int
+    evidence_id: str
+    source_part: str
+    source_page: int
+
+
 class HealthResponse(_StrictModel):
     status: Literal["ready", "unavailable"]

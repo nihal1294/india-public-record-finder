@@ -182,6 +182,44 @@ def test_api_examples_are_the_exact_manifest_array(client: TestClient) -> None:
     ]
 
 
+def test_demo_records_are_manifest_ordered_and_privacy_safe(client: TestClient) -> None:
+    response = client.get("/api/demo/records")
+
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
+    records = response.json()
+    assert len(records) == 120
+    assert [record["synthetic_id"] for record in records] == [
+        "SYN-KA-A",
+        "SYN-KA-B",
+        "SYN-KA-C",
+        "SYN-KA-D",
+        "SYN-KA-E",
+        "SYN-KA-F",
+        "SYN-KA-G",
+        "SYN-KA-H",
+        "SYN-KA-I",
+        "SYN-KA-J",
+        "SYN-KA-K",
+        *[f"SYN-KA-{number:03d}" for number in range(12, 121)],
+    ]
+    assert set(records[0]) == {
+        "synthetic_id",
+        "name",
+        "latin_name",
+        "relative_name",
+        "latin_relative_name",
+        "relationship",
+        "locality",
+        "latin_locality",
+        "age",
+        "evidence_id",
+        "source_part",
+        "source_page",
+    }
+    assert records[0]["relationship"] == "father"
+
+
 def test_record_and_health_routes_are_manifest_bound(client: TestClient) -> None:
     record = client.get("/api/records/SYN-KA-A")
     missing = client.get("/api/records/UNKNOWN")
@@ -240,6 +278,73 @@ def test_api_paths_never_fall_through_to_static_assets(tmp_path: Path, path: str
     assert response.status_code == 404
     assert response.headers["cache-control"] == "no-store"
     assert response.json() == {"detail": "not found"}
+
+
+def test_demo_data_spa_routes_serve_the_root_index_without_capturing_api_paths(
+    tmp_path: Path,
+) -> None:
+    snapshot = tmp_path / "snapshot"
+    web_root = tmp_path / "web"
+    web_root.mkdir()
+    index = b"<main>synthetic static page</main>"
+    (web_root / "index.html").write_bytes(index)
+    build_demo_snapshot(render_demo_source(tmp_path / "source"), snapshot, dense_encoder=_Encoder())
+    app = create_app(snapshot / "manifest.json", web_root=web_root, encoder=_Encoder())
+
+    with TestClient(app) as static_client:
+        root = static_client.get("/")
+        demo_data = static_client.get("/demo-data")
+        demo_data_slash = static_client.get("/demo-data/")
+        unknown_api = static_client.get("/api/not-a-route")
+
+    assert root.status_code == demo_data.status_code == demo_data_slash.status_code == 200
+    assert demo_data.content == demo_data_slash.content == root.content == index
+    assert root.headers["content-type"].startswith("text/html")
+    assert demo_data.headers["content-type"].startswith("text/html")
+    assert demo_data_slash.headers["content-type"].startswith("text/html")
+    assert unknown_api.status_code == 404
+    assert unknown_api.headers["cache-control"] == "no-store"
+    assert unknown_api.json() == {"detail": "not found"}
+
+
+def test_unknown_document_route_serves_the_spa_root_but_non_document_routes_remain_not_found(
+    tmp_path: Path,
+) -> None:
+    snapshot = tmp_path / "snapshot"
+    web_root = tmp_path / "web"
+    web_root.mkdir()
+    index = b"<main>synthetic static page</main>"
+    (web_root / "index.html").write_bytes(index)
+    build_demo_snapshot(render_demo_source(tmp_path / "source"), snapshot, dense_encoder=_Encoder())
+    app = create_app(snapshot / "manifest.json", web_root=web_root, encoder=_Encoder())
+
+    with TestClient(app) as static_client:
+        document = static_client.get("/stale-shared-route", headers={"accept": "text/html"})
+        non_document = static_client.get(
+            "/stale-shared-route",
+            headers={"accept": "application/json"},
+        )
+        missing_asset = static_client.get(
+            "/missing.js",
+            headers={"accept": "text/html", "sec-fetch-dest": "document"},
+        )
+        non_get = static_client.post("/stale-shared-route")
+        bare_api = static_client.get("/api", headers={"accept": "text/html"})
+        api_slash = static_client.get("/api/", headers={"accept": "text/html"})
+
+    assert document.status_code == 200
+    assert document.content == index
+    assert document.headers["content-type"].startswith("text/html")
+    assert non_document.status_code == 404
+    assert non_document.json() == {"detail": "not found"}
+    assert missing_asset.status_code == 404
+    assert missing_asset.json() == {"detail": "not found"}
+    assert non_get.status_code == 404
+    assert non_get.json() == {"detail": "not found"}
+    for api_response in (bare_api, api_slash):
+        assert api_response.status_code == 404
+        assert api_response.headers["cache-control"] == "no-store"
+        assert api_response.json() == {"detail": "not found"}
 
 
 @pytest.mark.parametrize(
