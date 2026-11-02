@@ -11,7 +11,7 @@ RUN pnpm --dir apps/web build
 
 FROM ghcr.io/astral-sh/uv:0.12.17 AS uv
 
-FROM python:3.14-slim AS service-build
+FROM python:3.15-slim AS service-build
 COPY --from=uv /uv /usr/local/bin/uv
 WORKDIR /build
 ENV UV_COMPILE_BYTECODE=1 \
@@ -25,7 +25,7 @@ RUN .venv/bin/python scripts/fetch_models.py multilingual_e5_small \
     && mkdir -p /opt/runtime-model-cache \
     && cp -aL /opt/model-cache/multilingual-e5-small /opt/runtime-model-cache/multilingual-e5-small
 
-FROM python:3.14-slim
+FROM python:3.15-slim
 ENV PATH=/app/.venv/bin:$PATH \
     PYTHONPATH=/app \
     PYTHONDONTWRITEBYTECODE=1 \
