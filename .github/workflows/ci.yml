@@ -1,0 +1,153 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '15 3 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - run: npm install --global pnpm@12.5.1
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        with:
+          version: '0.13.7'
+          python-version: '3.14.10'
+      - run: pnpm install --frozen-lockfile
+      - run: uv sync --locked --all-groups
+      - run: uv run --locked --all-groups ruff check src tests
+      - run: uv run --locked --all-groups mypy src
+      - run: uv run --locked --all-groups pytest -q
+      - run: uv build
+      - name: Fetch pinned retrieval model
+        run: uv run --locked --all-groups python scripts/fetch_models.py multilingual_e5_small --destination "$RUNNER_TEMP/model-cache" --manifest models/manifest.json
+      - name: Run retrieval benchmark
+        run: uv run --locked --all-groups record-finder benchmark --snapshot data/synthetic/demo-v1/manifest.json --queries benchmarks/queries.json --report "$RUNNER_TEMP/benchmark.json" --model-cache "$RUNNER_TEMP/model-cache"
+      - name: Upload benchmark report
+        if: always()
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: retrieval-benchmark
+          path: ${{ runner.temp }}/benchmark.json
+          if-no-files-found: warn
+
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - run: npm install --global pnpm@12.5.1
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir apps/web lint
+      - run: pnpm web:test
+      - run: pnpm web:build
+      - run: pnpm --dir apps/web exec playwright install --with-deps chrome
+      - run: pnpm e2e
+
+  ocr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: ocr
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        with:
+          version: '0.13.7'
+          python-version: '3.13.18'
+      - run: uv sync --locked
+      - run: uv run --locked record-finder-ocr --help
+      - run: uv run --locked python -c 'import paddle; import paddleocr; print(paddle.__version__, paddleocr.__version__)'
+      - run: uv build
+
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - run: npm install --global pnpm@12.5.1
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir apps/web exec playwright install --with-deps chrome
+      - run: docker build --pull -t record-finder-ci .
+      - name: Scan container image
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: record-finder-ci
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+      - name: Verify container service
+        run: |
+          set -eu
+          docker run -d --name record-finder-ci -p 127.0.0.1:8766:8080 record-finder-ci
+          trap 'docker logs record-finder-ci; docker rm -f record-finder-ci' EXIT
+          ready=false
+          for attempt in $(seq 1 120); do
+            if curl -fsS --connect-timeout 2 --max-time 5 http://127.0.0.1:8766/healthz | python3 -c 'import json,sys; assert json.load(sys.stdin) == {"status": "ready"}' 2>/dev/null; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+          test "$ready" = true
+          pnpm --dir apps/web exec playwright test -c playwright.container.config.ts
+
+  dependency-audit:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - run: npm install --global pnpm@12.5.1
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        with:
+          version: '0.13.7'
+          python-version: '3.14.10'
+      - run: uv export --locked --all-groups --no-emit-project --output-file "$RUNNER_TEMP/root-requirements.txt"
+      - run: uv export --project ocr --locked --no-emit-project --output-file "$RUNNER_TEMP/ocr-requirements.txt"
+      - name: Audit root Python dependencies
+        run: uvx --python 3.14.10 --from pip-audit==2.10.1 pip-audit --disable-pip --no-deps -r "$RUNNER_TEMP/root-requirements.txt"
+      - name: Audit OCR dependencies
+        if: success() || failure()
+        run: uvx --python 3.13.18 --from pip-audit==2.10.1 pip-audit --disable-pip --no-deps -r "$RUNNER_TEMP/ocr-requirements.txt"
+      - name: Audit JavaScript workspace
+        if: success() || failure()
+        run: pnpm audit
