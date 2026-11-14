@@ -11,7 +11,7 @@ def test_container_recipe_uses_only_the_read_only_service_surface() -> None:
     dockerfile = (ROOT / "Dockerfile").read_text(encoding="utf-8")
 
     assert "FROM node:24-bookworm-slim AS web-build" in dockerfile
-    assert "FROM python:3.14-slim AS service-build" in dockerfile
+    assert "FROM python:3.14.10-slim AS service-build" in dockerfile
     assert "USER recordfinder" in dockerfile
     assert "chown -R" not in dockerfile
     assert "scripts/fetch_models.py multilingual_e5_small" in dockerfile
@@ -21,6 +21,7 @@ def test_container_recipe_uses_only_the_read_only_service_surface() -> None:
     assert "COPY data/synthetic/demo-v1 /app/data/synthetic/demo-v1" in dockerfile
     assert "COPY --from=web-build /workspace/apps/web/dist /app/web" in dockerfile
     runtime_stage = dockerfile.rsplit("\nFROM ", maxsplit=1)[1]
+    assert runtime_stage.splitlines()[0] == "python:3.14.10-slim"
     assert "COPY LICENSE /app/LICENSE" in runtime_stage.splitlines()
     assert 'ENTRYPOINT ["record-finder"]' in dockerfile
     assert '"--snapshot", "/app/data/synthetic/demo-v1/manifest.json"' in dockerfile
