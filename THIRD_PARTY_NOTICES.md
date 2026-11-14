@@ -1,5 +1,12 @@
 # Third-party notices
 
+## Container runtime
+
+The container uses CPython and Wolfi operating-system packages. CPython is
+licensed under the Python Software Foundation License; package-specific licence
+information and source links for the Wolfi components are available in the
+[Wolfi package recipes](https://github.com/wolfi-dev/os).
+
 ## Noto Sans Kannada
 
 `apps/web/public/fonts/noto-sans-kannada/NotoSansKannada-Regular.ttf` is the current
