@@ -10,7 +10,8 @@ ROOT = Path(__file__).parents[2]
 def test_container_recipe_uses_only_the_read_only_service_surface() -> None:
     dockerfile = (ROOT / "Dockerfile").read_text(encoding="utf-8")
 
-    assert "FROM node:24-bookworm-slim AS web-build" in dockerfile
+    assert "FROM node:26-bookworm-slim AS web-build" in dockerfile
+    assert "RUN npm install --global pnpm@12.5.1 && pnpm install --frozen-lockfile" in dockerfile
     assert "FROM python:3.14.10-slim AS service-build" in dockerfile
     assert "USER recordfinder" in dockerfile
     assert "chown -R" not in dockerfile

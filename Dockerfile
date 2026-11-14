@@ -1,11 +1,10 @@
 # syntax=docker/dockerfile:1
 
-FROM node:24-bookworm-slim AS web-build
+FROM node:26-bookworm-slim AS web-build
 WORKDIR /workspace
-ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web/package.json apps/web/package.json
-RUN corepack enable && pnpm install --frozen-lockfile
+RUN npm install --global pnpm@12.5.1 && pnpm install --frozen-lockfile
 COPY apps/web apps/web
 RUN pnpm --dir apps/web build
 
