@@ -8,7 +8,7 @@ RUN npm install --global pnpm@12.5.1 && pnpm install --frozen-lockfile
 COPY apps/web apps/web
 RUN pnpm --dir apps/web build
 
-FROM ghcr.io/astral-sh/uv:0.12.17 AS uv
+FROM ghcr.io/astral-sh/uv:0.13.8 AS uv
 
 FROM cgr.dev/chainguard/wolfi-base@sha256:1f6b749929164c3d9e7cad0289254f39b2ba51e1dddaeb0fa57532ea03f2db31 AS python-base
 USER root
