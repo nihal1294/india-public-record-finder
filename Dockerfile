@@ -1,17 +1,16 @@
 # syntax=docker/dockerfile:1
 
-FROM node:24-bookworm-slim AS web-build
+FROM node:26-bookworm-slim AS web-build
 WORKDIR /workspace
-ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web/package.json apps/web/package.json
-RUN corepack enable && pnpm install --frozen-lockfile
+RUN npm install --global pnpm@12.5.1 && pnpm install --frozen-lockfile
 COPY apps/web apps/web
 RUN pnpm --dir apps/web build
 
 FROM ghcr.io/astral-sh/uv:0.12.17 AS uv
 
-FROM python:3.14-slim AS service-build
+FROM python:3.14.10-slim AS service-build
 COPY --from=uv /uv /usr/local/bin/uv
 WORKDIR /build
 ENV UV_COMPILE_BYTECODE=1 \
@@ -25,7 +24,7 @@ RUN .venv/bin/python scripts/fetch_models.py multilingual_e5_small \
     && mkdir -p /opt/runtime-model-cache \
     && cp -aL /opt/model-cache/multilingual-e5-small /opt/runtime-model-cache/multilingual-e5-small
 
-FROM python:3.14-slim
+FROM python:3.14.10-slim
 ENV PATH=/app/.venv/bin:$PATH \
     PYTHONPATH=/app \
     PYTHONDONTWRITEBYTECODE=1 \
