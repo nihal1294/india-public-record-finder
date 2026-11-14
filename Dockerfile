@@ -14,21 +14,22 @@ FROM cgr.dev/chainguard/wolfi-base@sha256:1f6b749929164c3d9e7cad0289254f39b2ba51
 USER root
 RUN apk upgrade --no-cache && apk add --no-cache \
     ca-certificates-bundle libstdc++ libgomp openssl-3.6-libssl \
-    sqlite-libs ncurses readline libffi libbz2-1 zlib \
+    sqlite-libs ncurses readline libffi libbz2-1 mpdecimal zlib \
     so:liblzma.so.5 so:libexpat.so.1 so:libzstd.so.1
 
 FROM python-base AS python-build
-RUN apk add --no-cache build-base bzip2-dev expat-dev libffi-dev \
-    ncurses-dev openssl-3.6-dev readline-dev sqlite-dev xz-dev zlib-dev zstd-dev
+RUN apk add --no-cache build-base bzip2-dev coreutils curl expat-dev gnutar libffi-dev \
+    mpdecimal-dev ncurses-dev openssl-3.6-dev pkgconf readline-dev sqlite-dev xz xz-dev \
+    zlib-dev zstd-dev
 ENV PYTHON_VERSION=3.14.10 \
     PYTHON_SHA256=de414a57119abef52784d8993e341d53aed635fc2b05c2607d9f98a2c5b72032
 RUN set -eux; \
-    wget -O /tmp/python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tar.xz"; \
+    curl -fsSL --retry 3 -o /tmp/python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tar.xz"; \
     echo "${PYTHON_SHA256}  /tmp/python.tar.xz" | sha256sum -c -; \
     xz -d /tmp/python.tar.xz; \
     mkdir /tmp/python; tar -xf /tmp/python.tar -C /tmp/python --strip-components=1; \
     cd /tmp/python; \
-    ./configure --enable-shared --without-ensurepip LDFLAGS='-Wl,-rpath,/usr/local/lib'; \
+    ./configure --enable-shared --without-ensurepip --with-system-libmpdec LDFLAGS='-Wl,-rpath,/usr/local/lib'; \
     make -j "$(nproc)"; make install; \
     rm -rf /usr/local/lib/python3.14/ensurepip; \
     ln -s python3 /usr/local/bin/python

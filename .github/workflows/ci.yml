@@ -109,6 +109,7 @@ jobs:
             done
           '
           docker run --rm -i --entrypoint python record-finder-ci <<'PY'
+          import _decimal
           import importlib.util
           import io
           import sqlite3
@@ -120,6 +121,7 @@ jobs:
 
           assert sys.version_info[:3] == (3, 14, 10)
           assert ssl.OPENSSL_VERSION.startswith('OpenSSL 3.')
+          assert _decimal.Decimal('0.1') + _decimal.Decimal('0.2') == _decimal.Decimal('0.3')
           assert sqlite3.sqlite_version_info >= (3, 54, 0)
           assert importlib.util.find_spec('pip') is None
           assert importlib.util.find_spec('ensurepip') is None

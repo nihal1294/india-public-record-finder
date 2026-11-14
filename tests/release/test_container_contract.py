@@ -22,6 +22,9 @@ def test_container_recipe_uses_only_the_read_only_service_surface() -> None:
     )
     assert "sha256sum -c -" in dockerfile
     assert "--enable-shared --without-ensurepip" in dockerfile
+    assert "--with-system-libmpdec" in dockerfile
+    assert "mpdecimal-dev" in dockerfile
+    assert "curl -fsSL --retry 3" in dockerfile
     assert "rm -rf /usr/local/lib/python3.14/ensurepip" in dockerfile
     assert "USER recordfinder" in dockerfile
     assert "chown -R" not in dockerfile
