@@ -178,12 +178,12 @@ jobs:
       - name: Audit root Python dependencies
         if: steps.scopes.outputs.root == 'true'
         run: |
-          uv export --quiet --locked --all-groups --no-emit-project --output-file "$RUNNER_TEMP/root-requirements.txt"
+          uv export --quiet --python 3.14.10 --locked --all-groups --no-emit-project --output-file "$RUNNER_TEMP/root-requirements.txt"
           uvx --python 3.14.10 --from pip-audit==2.10.1 pip-audit --disable-pip --require-hashes -r "$RUNNER_TEMP/root-requirements.txt"
       - name: Audit OCR dependencies
         if: (success() || failure()) && steps.scopes.outputs.ocr == 'true'
         run: |
-          uv export --quiet --project ocr --locked --no-emit-project --output-file "$RUNNER_TEMP/ocr-requirements.txt"
+          uv export --quiet --python 3.13.18 --project ocr --locked --no-emit-project --output-file "$RUNNER_TEMP/ocr-requirements.txt"
           uvx --python 3.13.18 --from pip-audit==2.10.1 pip-audit --disable-pip --require-hashes -r "$RUNNER_TEMP/ocr-requirements.txt"
       - name: Audit JavaScript workspace
         if: (success() || failure()) && steps.scopes.outputs.web == 'true'
