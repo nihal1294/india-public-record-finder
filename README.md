@@ -164,9 +164,10 @@ form. The sample does not search automatically.
 
 ## Container and deployment smoke checks
 
-The `Dockerfile` builds the browser application with Node 24 and packages it
-with the CPython 3.14 service, fictional snapshot, and pinned model. It runs as
-a non-root user and starts the read-only `record-finder serve` entrypoint.
+The `Dockerfile` builds the browser application with Node 26 and packages it
+with CPython 3.14.10, Wolfi system libraries, the fictional snapshot, and the
+pinned model. It runs as a non-root user and starts the read-only
+`record-finder serve` entrypoint.
 
 ```bash
 docker build -t india-public-record-finder .
