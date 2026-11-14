@@ -16,7 +16,10 @@ def test_container_recipe_uses_only_the_read_only_service_surface() -> None:
     assert "FROM python-runtime AS service-build" in dockerfile
     assert "FROM python-runtime AS runtime" in dockerfile
     assert "PYTHON_VERSION=3.14.10" in dockerfile
-    assert "PYTHON_SHA256=de414a57119abef52784d8993e341d53aed635fc2b05c2607d9f98a2c5b72032" in dockerfile
+    assert (
+        "PYTHON_SHA256=de414a57119abef52784d8993e341d53aed635fc2b05c2607d9f98a2c5b72032"
+        in dockerfile
+    )
     assert "sha256sum -c -" in dockerfile
     assert "--enable-shared --without-ensurepip" in dockerfile
     assert "rm -rf /usr/local/lib/python3.14/ensurepip" in dockerfile
