@@ -28,7 +28,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 deploy = [
-    "modal==1.5.5",
+    "modal==1.6.0",
 ]
 dev = [
     "httpx>=0.28.1",
