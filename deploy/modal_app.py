@@ -40,6 +40,14 @@ image = modal.Image.from_dockerfile(
     DOCKERFILE,
     context_dir=REPOSITORY_ROOT,
 ).entrypoint([])
+image = image.uv_sync(
+    uv_project_dir=str(REPOSITORY_ROOT),
+    groups=["deploy"],
+    frozen=True,
+    extra_options="--no-dev --inexact",
+    uv_version="0.13.8",
+    env={"UV_PROJECT_ENVIRONMENT": "/app/.venv"},
+)
 app = modal.App(APP_NAME)
 
 
@@ -54,4 +62,4 @@ app = modal.App(APP_NAME)
 @modal.concurrent(max_inputs=CONCURRENCY_LIMIT)
 @modal.web_server(PORT, startup_timeout=STARTUP_TIMEOUT_SECONDS, label=WEB_LABEL)
 def web() -> None:
-    subprocess.Popen(SERVICE_COMMAND, cwd="/app")
+    subprocess.Popen(SERVICE_COMMAND)

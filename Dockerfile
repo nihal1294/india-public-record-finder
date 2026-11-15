@@ -54,6 +54,7 @@ RUN .venv/bin/python scripts/fetch_models.py multilingual_e5_small \
 
 FROM python-runtime AS runtime
 ENV PATH=/app/.venv/bin:$PATH \
+    PYTHONPATH=/app \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 RUN addgroup -S recordfinder && adduser -S -D -H -G recordfinder recordfinder

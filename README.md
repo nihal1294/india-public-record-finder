@@ -174,9 +174,11 @@ docker build -t india-public-record-finder .
 docker run --rm -p 8080:8080 india-public-record-finder
 ```
 
-The Modal driver builds that Dockerfile as a remote image. Deployment changes
-public traffic, so run it only from an approved immutable release tree with an
-approved full commit SHA:
+The Modal driver builds that Dockerfile as a remote image, then installs the
+locked `deploy` dependency group into the existing service environment for
+managed worker startup. The generic Docker image excludes this hosted runtime
+layer. Deployment changes public traffic, so run it only from an approved
+immutable release tree with an approved full commit SHA:
 
 ```bash
 uv run --group deploy modal deploy deploy/modal_app.py \
