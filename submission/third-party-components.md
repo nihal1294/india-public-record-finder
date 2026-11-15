@@ -44,9 +44,9 @@ service-runtime dependencies.
 
 ## Deployment tooling
 
-- Modal (`modal`) - Apache-2.0. It is deploy-only tooling for building the
-  repository Dockerfile image and exposing the web service. It is not a
-  service-runtime dependency.
+- Modal (`modal`) - Apache-2.0. The `deploy` group supplies deploy-only tooling
+  and the managed runtime client. The hosted image installs this locked group
+  for worker startup; the generic Docker service image excludes it.
 
 ## OCR components outside the citizen path
 
