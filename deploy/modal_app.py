@@ -54,4 +54,4 @@ app = modal.App(APP_NAME)
 @modal.concurrent(max_inputs=CONCURRENCY_LIMIT)
 @modal.web_server(PORT, startup_timeout=STARTUP_TIMEOUT_SECONDS, label=WEB_LABEL)
 def web() -> None:
-    subprocess.Popen(SERVICE_COMMAND)
+    subprocess.Popen(SERVICE_COMMAND, cwd="/app")
