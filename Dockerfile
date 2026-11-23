@@ -10,7 +10,7 @@ RUN pnpm --dir apps/web build
 
 FROM ghcr.io/astral-sh/uv:0.13.8 AS uv
 
-FROM cgr.dev/chainguard/wolfi-base@sha256:1f6b749929164c3d9e7cad0289254f39b2ba51e1dddaeb0fa57532ea03f2db31 AS python-base
+FROM cgr.dev/chainguard/wolfi-base@sha256:be019c1c74fe69204a42c4e10bc4d886a49bf5403ffa74374ef7baa408fc9a26 AS python-base
 USER root
 RUN apk upgrade --no-cache && apk add --no-cache \
     ca-certificates-bundle libstdc++ libgomp openssl-3.6-libssl \
